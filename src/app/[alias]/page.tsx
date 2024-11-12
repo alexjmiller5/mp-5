@@ -1,13 +1,17 @@
 import { redirect } from 'next/navigation';
 import getCollection, { URLS_COLLECTION } from '@/utils/mongodb';
 
-interface Params {
-  alias: string;
+// Define PageProps interface with Promise params
+interface PageProps {
+  params: Promise<{ alias: string }>;
 }
 
-export default async function AliasPage({ params }: { params: Params }) {
+export default async function AliasPage({ 
+  params 
+}: PageProps) {
   try {
-    const { alias } = params;
+    const resolvedParams = await params;
+    const { alias } = resolvedParams;
     const urlsCollection = await getCollection(URLS_COLLECTION);
     const record = await urlsCollection.findOne({ alias });
 
@@ -23,8 +27,7 @@ export default async function AliasPage({ params }: { params: Params }) {
     console.error('Error processing request:', error);
     return (
       <div>
-        <h1>Service Unavailable</h1>
-        <p>Please try again later</p>
+        <h1>Error occurred</h1>
       </div>
     );
   }
