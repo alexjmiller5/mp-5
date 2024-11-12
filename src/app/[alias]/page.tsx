@@ -1,28 +1,21 @@
+import getCollection, { URLS_COLLECTION } from '@/../mongodb';
 import { redirect } from 'next/navigation';
-import getCollection, { URLS_COLLECTION } from '@/utils/mongodb';
 
-// Define PageProps interface with Promise params
 interface PageProps {
   params: Promise<{ alias: string }>;
 }
 
-export default async function AliasPage({ 
-  params 
+export default async function AliasPage({
+  params
 }: PageProps) {
+  let url: string | undefined;
+
   try {
     const resolvedParams = await params;
     const { alias } = resolvedParams;
     const urlsCollection = await getCollection(URLS_COLLECTION);
     const record = await urlsCollection.findOne({ alias });
-
-    if (record) {
-      redirect(record.url);
-    }
-    return (
-      <div>
-        <h1>Alias not found</h1>
-      </div>
-    );
+    url = record?.url;
   } catch (error) {
     console.error('Error processing request:', error);
     return (
@@ -31,4 +24,14 @@ export default async function AliasPage({
       </div>
     );
   }
+
+  if (url) {
+    redirect(url);
+  }
+
+  return (
+    <div>
+      <h1>Alias not found</h1>
+    </div>
+  );
 }
